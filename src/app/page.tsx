@@ -1,40 +1,42 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { StudentForm } from "@/components/StudentForm";
 import { QRView } from "@/components/QRView";
+import { useState, useEffect } from "react";
 
-// 메인 컴포넌트
 export default function Home() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const [studentId, setStudentId] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  // URL에서 학번 파라미터 확인
+  // 컴포넌트 마운트 시 localStorage에서 학번 로드
   useEffect(() => {
-    const idFromQuery = searchParams.get("id");
-    if (idFromQuery) {
-      setStudentId(idFromQuery);
-      setSubmitted(true);
+    const savedId = localStorage.getItem("studentId");
+    if (savedId) {
+      setStudentId(savedId);
+      setIsSubmitted(true);
     }
-  }, [searchParams]);
+    setIsLoaded(true);
+  }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (studentId.trim()) {
-      // URL 쿼리 파라미터에 학번 저장
-      router.push(`/?id=${studentId}`);
-      setSubmitted(true);
-    }
+  const handleSubmit = (id: string) => {
+    setStudentId(id);
+    setIsSubmitted(true);
   };
 
   const handleReset = () => {
-    setSubmitted(false);
-    // 쿼리 파라미터 제거
-    router.push("/");
+    setStudentId("");
+    setIsSubmitted(false);
   };
+
+  // localStorage 접근 이전에는 로딩 표시
+  if (!isLoaded) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-gray-100 dark:bg-gray-900">
+        <div className="text-gray-700 dark:text-gray-300">로딩 중...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 dark:bg-gray-900">
@@ -43,12 +45,8 @@ export default function Home() {
           도서관 QR 코드
         </h1>
 
-        {!submitted ? (
-          <StudentForm
-            studentId={studentId}
-            setStudentId={setStudentId}
-            onSubmit={handleSubmit}
-          />
+        {!isSubmitted ? (
+          <StudentForm onSubmit={handleSubmit} initialStudentId={studentId} />
         ) : (
           <QRView studentId={studentId} onReset={handleReset} />
         )}

@@ -1,20 +1,39 @@
 "use client";
 
+import { useState, useEffect } from "react";
+
 // 학번 입력 폼 컴포넌트 props 타입
 export type StudentFormProps = {
-  studentId: string;
-  setStudentId: (id: string) => void;
-  onSubmit: (e: React.FormEvent) => void;
+  onSubmit: (id: string) => void;
+  initialStudentId?: string;
 };
 
 // 학번 입력 폼 컴포넌트
 export function StudentForm({
-  studentId,
-  setStudentId,
   onSubmit,
+  initialStudentId = "",
 }: StudentFormProps) {
+  const [studentId, setStudentId] = useState(initialStudentId);
+
+  // 초기 로드 시 localStorage에서 학번 가져오기
+  useEffect(() => {
+    const savedId = localStorage.getItem("studentId");
+    if (savedId) {
+      setStudentId(savedId);
+    }
+  }, []);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (studentId.trim()) {
+      // localStorage에 학번 저장
+      localStorage.setItem("studentId", studentId);
+      onSubmit(studentId);
+    }
+  };
+
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label
           htmlFor="studentId"

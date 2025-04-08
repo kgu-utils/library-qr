@@ -1,14 +1,16 @@
 import type { MetadataRoute } from "next";
 
+export const dynamic = "force-static";
+
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Next.js PWA",
-    short_name: "NextPWA",
-    description: "A Progressive Web App built with Next.js",
+    name: "도서관 QR 코드",
+    short_name: "도서관 QR",
+    description: "학번 기반 QR 코드 생성 애플리케이션",
     start_url: "/",
     display: "standalone",
     background_color: "#ffffff",
-    theme_color: "#000000",
+    theme_color: "#3b82f6",
     icons: [
       {
         src: "/web-app-manifest-192x192.png",

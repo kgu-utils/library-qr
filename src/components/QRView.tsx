@@ -14,6 +14,12 @@ export function QRView({ studentId, onReset }: QRViewProps) {
   // QR 코드 생성 로직
   const qrValue = useQRCode(studentId);
 
+  const handleReset = () => {
+    // localStorage에서 학번 제거
+    localStorage.removeItem("studentId");
+    onReset();
+  };
+
   return (
     <div className="flex flex-col items-center space-y-4">
       <p className="text-lg font-medium text-gray-800 dark:text-white">
@@ -26,7 +32,7 @@ export function QRView({ studentId, onReset }: QRViewProps) {
         QR 값: {qrValue}
       </p>
       <button
-        onClick={onReset}
+        onClick={handleReset}
         className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
       >
         다시 입력하기
