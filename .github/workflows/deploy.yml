@@ -28,7 +28,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
 
       - name: pnpm 설치
         uses: pnpm/action-setup@v2
@@ -36,13 +35,26 @@ jobs:
           version: 8
           run_install: false
 
+      # lock 파일 확인
+      - name: lock 파일 확인
+        id: check-lockfile
+        run: |
+          if [ -f "pnpm-lock.yaml" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      # lock 파일이 있을 경우 캐시 사용
       - name: pnpm store 캐시 가져오기
+        if: steps.check-lockfile.outputs.exists == 'true'
         id: pnpm-cache
         shell: bash
         run: |
           echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
 
       - name: 의존성 캐시 설정
+        if: steps.check-lockfile.outputs.exists == 'true'
         uses: actions/cache@v3
         with:
           path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
@@ -50,8 +62,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
+      # lock 파일이 있으면 일반 설치, 없으면 --no-frozen-lockfile 옵션 사용
       - name: 의존성 설치
-        run: pnpm install
+        run: |
+          if [ "${{ steps.check-lockfile.outputs.exists }}" == "true" ]; then
+            pnpm install
+          else
+            pnpm install --no-frozen-lockfile
+          fi
 
       - name: next.config.js 생성
         run: |
