@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 
 // 학번 입력 폼 컴포넌트 props 타입
 export type StudentFormProps = {
@@ -13,21 +14,35 @@ export function StudentForm({
   onSubmit,
   initialStudentId = "",
 }: StudentFormProps) {
+  const searchParams = useSearchParams();
   const [studentId, setStudentId] = useState(initialStudentId);
 
-  // 초기 로드 시 localStorage에서 학번 가져오기
+  // 초기 로드 시 URL 쿼리와 localStorage에서 학번 가져오기
   useEffect(() => {
-    const savedId = localStorage.getItem("studentId");
-    if (savedId) {
-      setStudentId(savedId);
+    // URL 쿼리 파라미터 확인
+    const queryId = searchParams.get("id");
+    if (queryId) {
+      setStudentId(queryId);
+    } else {
+      // localStorage에서 학번 가져오기
+      const savedId = localStorage.getItem("studentId");
+      if (savedId && !initialStudentId) {
+        setStudentId(savedId);
+      }
     }
-  }, []);
+  }, [searchParams, initialStudentId]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (studentId.trim()) {
       // localStorage에 학번 저장
       localStorage.setItem("studentId", studentId);
+
+      // URL 쿼리 파라미터 업데이트 (선택적)
+      const url = new URL(window.location.href);
+      url.searchParams.set("id", studentId);
+      window.history.replaceState({}, "", url);
+
       onSubmit(studentId);
     }
   };
