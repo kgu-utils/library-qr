@@ -17,11 +17,21 @@ export function StudentForm({
 
   // 초기 로드 시 localStorage에서 학번 가져오기
   useEffect(() => {
-    const savedId = localStorage.getItem("studentId");
-    if (savedId) {
-      setStudentId(savedId);
+    // initialStudentId가 없는 경우에만 localStorage에서 가져옴
+    if (!initialStudentId) {
+      const savedId = localStorage.getItem("studentId");
+      if (savedId) {
+        setStudentId(savedId);
+      }
     }
-  }, []);
+  }, [initialStudentId]);
+
+  // 초기 학번이 변경되면 상태 업데이트
+  useEffect(() => {
+    if (initialStudentId) {
+      setStudentId(initialStudentId);
+    }
+  }, [initialStudentId]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
